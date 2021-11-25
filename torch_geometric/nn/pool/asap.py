@@ -55,7 +55,7 @@ class ASAPooling(torch.nn.Module):
                  GNN: Optional[Callable] = None, dropout: float = 0.0,
                  negative_slope: float = 0.2, add_self_loops: bool = False,
                  **kwargs):
-        super(ASAPooling, self).__init__()
+        super().__init__()
 
         self.in_channels = in_channels
         self.ratio = ratio
@@ -84,7 +84,7 @@ class ASAPooling(torch.nn.Module):
         N = x.size(0)
 
         edge_index, edge_weight = add_remaining_self_loops(
-            edge_index, edge_weight, fill_value=1, num_nodes=N)
+            edge_index, edge_weight, fill_value=1., num_nodes=N)
 
         if batch is None:
             batch = edge_index.new_zeros(x.size(0))
