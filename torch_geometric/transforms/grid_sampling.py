@@ -63,11 +63,10 @@ class GridSampling(BaseTransform):
                 else:
                     data[key] = scatter_mean(item, c, dim=0)
                     if key == 'pos' and self.return_centers:
-                        data[key] = (self.size *
-                                     (torch.div(data[key],
-                                                self.size,
-                                                rounding_mode='floor'))
-                                     + 0.5 * self.size)
+                        data[key] = torch.div(data[key],
+                                              self.size,
+                                              rounding_mode='floor')
+                        data[key] = self.size * (data[key] + 0.5)
 
         return data
 
