@@ -14,8 +14,6 @@ from torch_geometric.transforms import BaseTransform
 
 class GridSampling(BaseTransform):
     r"""Clusters points into voxels with size :attr:`size`.
-    Each cluster returned is a new point based on the mean of all points
-    inside the given cluster.
 
     Args:
         size (float or [float] or Tensor): Size of a voxel (in each dimension).
@@ -27,13 +25,19 @@ class GridSampling(BaseTransform):
             (in each dimension). If set to :obj:`None`, will be set to the
             maximum coordinates found in :obj:`data.pos`.
             (default: :obj:`None`)
+        return_centers (bool, optional): If set to True, will return the
+            center of each cluster, otherwise the mean position of all points
+            inside the given cluster.
+            (default: :obj:`False`)
     """
     def __init__(self, size: Union[float, List[float], Tensor],
                  start: Optional[Union[float, List[float], Tensor]] = None,
-                 end: Optional[Union[float, List[float], Tensor]] = None):
+                 end: Optional[Union[float, List[float], Tensor]] = None,
+                 return_centers: Optional[bool] = False):
         self.size = size
         self.start = start
         self.end = end
+        self.return_centers = return_centers
 
     def __call__(self, data: Data) -> Data:
         num_nodes = data.num_nodes
@@ -58,6 +62,12 @@ class GridSampling(BaseTransform):
                     data[key] = item[perm]
                 else:
                     data[key] = scatter_mean(item, c, dim=0)
+                    if key == 'pos' and self.return_centers:
+                        data[key] = (self.size *
+                                     (torch.div(data[key],
+                                                self.size,
+                                                rounding_mode='floor'))
+                                     + 0.5 * self.size)
 
         return data
 
